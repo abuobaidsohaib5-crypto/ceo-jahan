@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JAHAN BUSY SCHEDULE™</title>
+    <style>
+        :root {
+            --pink-bg: #ffe4e1;
+            --pink-card: #fff0f5;
+            --pink-primary: #ff69b4;
+            --pink-dark: #d1478e;
+            --text-main: #4a4a4a;
+            --text-muted: #888;
+            --alert-red: #ff4757;
+            --success-green: #2ed573;
+            --font-main: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka One', sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--pink-bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.2);
+            position: relative;
+            z-index: 10;
+            padding-bottom: 50px;
+        }
+
+        /* Views */
+        .view { display: none; padding: 20px; }
+        .view.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 20px 20px;
+            background: linear-gradient(180deg, var(--pink-primary) 0%, #ffffff 100%);
+            border-bottom: 4px dashed var(--pink-card);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 0px var(--pink-dark);
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--pink-dark);
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        /* Cards / Sections */
+        .card {
+            background: var(--pink-card);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 20px;
+            border: 3px solid #ffe4e1;
+            box-shadow: 0 8px 15px rgba(255, 105, 180, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--pink-primary);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--pink-primary);
+            padding-bottom: 5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Grids and Lists */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .data-label { font-weight: bold; color: var(--text-muted); }
+        .data-value { font-weight: 900; text-align: right; }
+        .val-highlight { color: var(--pink-primary); }
+        .val-alert { color: var(--alert-red); animation: pulseAlert 1.5s infinite; }
+
+        @keyframes pulseAlert {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); color: #ff0000; }
+            100% { transform: scale(1); }
+        }
+
+        .check-list { list-style: none; }
+        .check-list li { margin-bottom: 6px; padding-left: 24px; position: relative; font-weight: bold;}
+        .check-list.good li::before { content: '✔'; position: absolute; left: 0; color: var(--success-green); }
+        .check-list.bad li::before { content: '❌'; position: absolute; left: 0; color: var(--alert-red); }
+
+        /* Custom Section Styles */
+        .investigation-card {
+            background: #fff8eb;
+            border-color: #ffdcb3;
+            font-family: var(--font-mono);
+        }
+        .investigation-card .section-title {
+            font-family: var(--font-mono);
+            color: #d35400;
+            border-bottom-color: #d35400;
+        }
+        .stamp {
+            position: absolute;
+            top: 20px;
+            right: -10px;
+            color: rgba(255, 71, 87, 0.3);
+            font-size: 2rem;
+            font-weight: 900;
+            border: 4px solid rgba(255, 71, 87, 0.3);
+            padding: 5px;
+            transform: rotate(-15deg);
+            pointer-events: none;
+            font-family: var(--font-mono);
+        }
+
+        .timeline {
+            border-left: 3px solid var(--pink-primary);
+            margin-left: 10px;
+            padding-left: 15px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 3px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border: 3px solid var(--pink-primary);
+            border-radius: 50%;
+        }
+        .timeline-year { font-weight: 900; color: var(--pink-dark); font-size: 0.85rem;}
+        .timeline-desc { font-weight: bold; }
+
+        .wanted-poster {
+            background: #fdf5e6;
+            border: 5px dashed #8b4513;
+            text-align: center;
+            color: #8b4513;
+        }
+        .wanted-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px;}
+        .wanted-img {
+            font-size: 4rem;
+            margin: 10px 0;
+        }
+
+        /* Notifs & Tickers */
+        .live-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--alert-red);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .notif-box {
+            height: 150px;
+            overflow-y: hidden;
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            border: 2px solid #ffe4e1;
+            position: relative;
+        }
+        .notif-item {
+            font-size: 0.85rem;
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0;} to { transform: translateX(0); opacity: 1;} }
+
+        .breaking-news {
+            background: var(--alert-red);
+            color: white;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+        }
+        .breaking-marquee {
+            display: inline-block;
+            animation: scrollNews 10s linear infinite;
+        }
+        @keyframes scrollNews {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Buttons & Interactions */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: var(--pink-primary);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-align: center;
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 6px 0 var(--pink-dark);
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 var(--pink-dark);
+        }
+
+        /* Loading / Search View */
+        .loader-container {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .scanner-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+        .scanner-fill {
+            width: 50%;
+            height: 100%;
+            background: var(--pink-primary);
+            position: absolute;
+            animation: scan 1s infinite alternate ease-in-out;
+        }
+        @keyframes scan { from { left: 0; } to { left: 50%; } }
+        .loading-text { font-size: 1.2rem; font-weight: bold; color: var(--pink-dark); margin-bottom: 10px;}
+        .loading-subtext { font-size: 0.9rem; color: var(--text-muted); min-height: 20px;}
+
+        /* Results Box */
+        .result-box {
+            background: #fff;
+            border: 4px dashed var(--pink-primary);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .result-time {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--alert-red);
+            margin: 10px 0;
+        }
+
+        /* Floating elements */
+        .floating-emoji {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUp 4s linear forwards;
+            font-size: 1.5rem;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-20vh) translateX(50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Toast Popup */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+        }
+        .toast.show { opacity: 1; top: 40px; }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast">System Warning!</div>
+
+    <div class="app-container">
+        
+        <header>
+            <h1>JAHAN BUSY SCHEDULE™</h1>
+            <div class="subtitle">"availability not found since 2025"</div>
+        </header>
+
+        <!-- VIEW: MAIN DASHBOARD -->
+        <div id="view-main" class="view active">
+            
+            <!-- SECTION 12: BREAKING NEWS -->
+            <div class="breaking-news">
+                <span style="background: white; color: var(--alert-red); padding: 2px 5px; border-radius: 5px; margin-right: 5px;">LIVE</span>
+                <div class="breaking-marquee" id="breaking-marquee">BREAKING: Jahan opened TikTok again • UPDATE: free time was located... false alarm it was TikTok • </div>
+            </div>
+
+            <!-- SECTION 1: TARGET TRACKER -->
+            <div class="card">
+                <div class="section-title">📡 Target Tracker</div>
+                <div class="data-grid">
+                    <div class="data-label">Current Location:</div><div class="data-value val-highlight">TikTok</div>
+                    <div class="data-label">Last Seen:</div><div class="data-value val-highlight">TikTok</div>
+                    <div class="data-label">Likely Next Location:</div><div class="data-value val-highlight">TikTok</div>
+                    <div class="data-label">Emergency Contact:</div><div class="data-value">Love Island</div>
+                    <div class="data-label">Current Threat Level:</div><div class="data-value val-alert">Extremely Busy</div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: AVAILABILITY AUDIT -->
+            <div class="card">
+                <div class="section-title">📅 Availability Audit</div>
+                <div class="data-grid">
+                    <div class="data-label">Availability:</div><div class="data-value">currently unavailable</div>
+                    <div class="data-label">After checking:</div><div class="data-value">still unavailable</div>
+                    <div class="data-label">Checking again:</div><div class="data-value val-alert">somehow even less available</div>
+                    <div class="data-label">Checking 4th time:</div><div class="data-value">how did it get worse</div>
+                    <div class="data-label">Checking 5th time:</div><div class="data-value val-alert">negative availability</div>
+                    <div class="data-label">Next week:</div><div class="data-value">busy</div>
+                    <div class="data-label">Next month:</div><div class="data-value">busy</div>
+                    <div class="data-label">Next year:</div><div class="data-value">busy</div>
+                    <div class="data-label">After retirement:</div><div class="data-value">maybe</div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: IDEA OWNERSHIP INVESTIGATION -->
+            <div class="card investigation-card">
+                <div class="stamp">CLASSIFIED</div>
+                <div class="section-title">🕵️‍♂️ Idea Ownership Investigation</div>
+                <div class="data-grid" style="margin-bottom: 10px;">
+                    <div class="data-label">Owner Of Ideas:</div><div class="data-value">Sohaib</div>
+                    <div class="data-label">Current Holder:</div><div class="data-value">Jahan</div>
+                    <div class="data-label">Transfer Authorized:</div><div class="data-value val-alert">No</div>
+                    <div class="data-label">Investigation Status:</div><div class="data-value">ongoing</div>
+                    <div class="data-label">Jahan's Statement:</div><div class="data-value">"finders keepers"</div>
+                </div>
+                <div style="border-top: 1px dashed #d35400; padding-top: 10px;">
+                    <div class="data-grid">
+                        <div class="data-label">Owner Of Ideas:</div><div class="data-value">Sohaib</div>
+                        <div class="data-label">Owner (per Jahan):</div><div class="data-value">Jahan</div>
+                        <div class="data-label">Owner (Reality):</div><div class="data-value val-highlight">Sohaib</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: BORROWED IDEA TRACKER -->
+            <div class="card">
+                <div class="section-title">💡 Borrowed Idea Tracker</div>
+                <div class="data-grid">
+                    <div class="data-label">Borrowed From Sohaib:</div><div class="data-value val-alert">still counting</div>
+                    <div class="data-label">Ideas Returned:</div><div class="data-value">0</div>
+                    <div class="data-label">Ideas Missing:</div><div class="data-value">247</div>
+                    <div class="data-label">Accidentally Borrowed:</div><div class="data-value">247</div>
+                    <div class="data-label">Claims Are Hers:</div><div class="data-value">all of them</div>
+                    <div class="data-label">Evidence:</div><div class="data-value">overwhelming</div>
+                    <div class="data-label">Prime Suspect:</div><div class="data-value val-highlight">Jahan</div>
+                    <div class="data-label">Lead Investigator:</div><div class="data-value">Sohaib</div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: KNOWN CRIMES -->
+            <div class="card">
+                <div class="section-title">🚨 Known Crimes</div>
+                <ul class="check-list bad">
+                    <li>stealing internship ideas</li>
+                    <li>stealing business ideas</li>
+                    <li>stealing AI ideas</li>
+                    <li>stealing secure system ideas</li>
+                    <li>stealing random shower thoughts</li>
+                    <li>stealing conversations</li>
+                    <li>stealing future plans</li>
+                    <li>stealing another idea while reading this</li>
+                </ul>
+                <div style="margin-top: 15px; text-align: center; font-weight: bold; background: #fff; padding: 10px; border-radius: 10px; border: 2px solid var(--alert-red);">
+                    Mandatory Punishment: <span style="font-size: 1.2rem;">coffee ☕</span>
+                </div>
+            </div>
+
+            <!-- SECTION 6: RESUME INVESTIGATION DIVISION -->
+            <div class="card investigation-card">
+                <div class="stamp" style="top: auto; bottom: 10px; transform: rotate(10deg);">SUS</div>
+                <div class="section-title">📄 Resume Investigation Division</div>
+                <div class="data-grid">
+                    <div class="data-label">Resume Quality:</div><div class="data-value">A+</div>
+                    <div class="data-label">Originality:</div><div class="data-value val-alert">under investigation</div>
+                    <div class="data-label">Suspicion Level:</div><div class="data-value val-alert">extremely high</div>
+                    <div class="data-label">Resume Updates:</div><div class="data-value">93</div>
+                    <div class="data-label">Times someone said "wait":</div><div class="data-value">84</div>
+                    <div class="data-label">Evidence gone missing:</div><div class="data-value">247</div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: TIMELINE -->
+            <div class="card">
+                <div class="section-title">⏳ Timeline</div>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="timeline-year">2025</div><div class="timeline-desc">normal resume</div></div>
+                    <div class="timeline-item"><div class="timeline-year">2025</div><div class="timeline-desc">good resume</div></div>
+                    <div class="timeline-item"><div class="timeline-year">2025</div><div class="timeline-desc">very good resume</div></div>
+                    <div class="timeline-item"><div class="timeline-year">2025</div><div class="timeline-desc val-alert">wait a minute</div></div>
+                    <div class="timeline-item"><div class="timeline-year">2025</div><div class="timeline-desc">where did all these ideas come from</div></div>
+                    <div class="timeline-item"><div class="timeline-year">2026</div><div class="timeline-desc val-highlight">investigation opened</div></div>
+                </div>
+            </div>
+
+            <!-- SECTION 8 & 9: THINGS JAHAN HAS TIME FOR -->
+            <div class="card">
+                <div class="section-title">✅ Things Jahan Has Time For</div>
+                <ul class="check-list good">
+                    <li>TikTok</li>
+                    <li>Love Island</li>
+                    <li>Resume updates</li>
+                    <li>Looking at internships</li>
+                    <li>Looking at my internships</li>
+                    <li>Looking at ideas</li>
+                    <li>Looking at my ideas</li>
+                    <li>Being busy</li>
+                    <li>Explaining why she's busy</li>
+                    <li>Watching one more episode</li>
+                </ul>
+
+                <div class="section-title" style="margin-top: 20px;">❌ Things Jahan DOES NOT Have Time For</div>
+                <ul class="check-list bad">
+                    <li>coffee</li>
+                    <li>tennis</li>
+                    <li>5 minutes</li>
+                    <li>touching grass</li>
+                    <li>being available</li>
+                    <li>replying before 4 business days</li>
+                </ul>
+            </div>
+
+            <!-- SECTION 13: STOCK MARKET -->
+            <div class="card" style="background: #1e272e; color: #fff; border-color: #485460;">
+                <div class="section-title" style="color: #0fb9b1; border-bottom-color: #0fb9b1;">📈 JAHAN BUSY INDEX</div>
+                <div class="data-grid">
+                    <div class="data-label" style="color: #ccc;">TikTok Stock:</div><div class="data-value">📈 <span style="color: #2ed573;">+420%</span></div>
+                    <div class="data-label" style="color: #ccc;">Free Time Stock:</div><div class="data-value">📉 <span style="color: #ff4757;">-99%</span></div>
+                    <div class="data-label" style="color: #ccc;">Coffee Probability:</div><div class="data-value" style="color: #ffa502;">1%</div>
+                    <div class="data-label" style="color: #ccc;">Love Island Stock:</div><div class="data-value">🚀 <span style="color: #2ed573;">TO THE MOON</span></div>
+                    <div class="data-label" style="color: #ccc;">Availability Stock:</div><div class="data-value val-alert" style="color: #ff4757;">bankrupt</div>
+                </div>
+            </div>
+
+            <!-- SECTION 14: ACHIEVEMENTS -->
+            <div class="card">
+                <div class="section-title">🏆 Achievements</div>
+                <ul style="list-style: none; line-height: 1.8; font-weight: bold;">
+                    <li>🏆 Hall Of Fame TikTok User</li>
+                    <li>🏆 Professional Schedule Avoider</li>
+                    <li>🏆 Outstanding Borrowing Skills</li>
+                    <li>🏆 Suspiciously Good Resume</li>
+                    <li>🏆 Generational Love Island Watcher</li>
+                    <li>🏆 Availability Destroyer</li>
+                </ul>
+            </div>
+
+            <!-- SECTION 15: WANTED POSTER -->
+            <div class="card wanted-poster">
+                <div class="wanted-title">WANTED</div>
+                <div class="wanted-img">🕵️‍♀️</div>
+                <div class="data-grid" style="text-align: left; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
+                    <div class="data-label">Name:</div><div class="data-value">Jahan</div>
+                    <div class="data-label">Charges:</div><div class="data-value">Too Busy</div>
+                    <div class="data-label">Reward:</div><div class="data-value val-highlight">One Coffee</div>
+                    <div class="data-label">Last Seen:</div><div class="data-value">TikTok</div>
+                    <div class="data-label">Armed:</div><div class="data-value">With Excuses</div>
+                    <div class="data-label">Danger Level:</div><div class="data-value val-alert">Cute But Dangerous</div>
+                </div>
+            </div>
+
+            <!-- SECTION 10: LIVE NOTIFICATION CENTER -->
+            <div class="card">
+                <div class="section-title"><span class="live-dot"></span> Live Notification Center</div>
+                <div class="notif-box" id="notif-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- SECTION 11: FREE TIME DETECTOR (TRIGGER) -->
+            <button class="btn" id="btn-find-time" onclick="startSearch()">FIND FREE TIME</button>
+
+        </div>
+
+        <!-- VIEW: SEARCHING / LOADING -->
+        <div id="view-search" class="view">
+            <div class="loader-container">
+                <div style="font-size: 4rem; animation: pulseAlert 1s infinite;">🔍</div>
+                <div class="loading-text" style="margin-top: 20px;">Emergency Availability Scan</div>
+                <div class="scanner-bar"><div class="scanner-fill"></div></div>
+                <div class="loading-subtext" id="loading-status">initializing system...</div>
+            </div>
+        </div>
+
+        <!-- VIEW: SEARCH RESULT -->
+        <div id="view-result" class="view">
+            <div class="result-box">
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-muted);" id="result-label">Available Time Found:</div>
+                <div class="result-time" id="result-value">7 seconds</div>
+                <div style="font-weight: bold; color: var(--text-main); margin-top: 15px;" id="result-sub"></div>
+            </div>
+            
+            <div id="coffee-extras" style="display: none; background: #fff8f9; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; border: 2px solid #ffb6c1;">
+                <h3 style="color: var(--pink-primary); margin-bottom: 10px;">Optional Add-ons:</h3>
+                <p>Maybe Tennis 🎾</p>
+                <p>Maybe Food 🍔</p>
+                <p>Maybe A Walk 🚶</p>
+            </div>
+
+            <button class="btn" id="btn-retry" onclick="retrySearch()" style="background: var(--text-muted); box-shadow: 0 6px 0 #555;">Try Again</button>
+            <button class="btn" id="btn-accept" onclick="showEnding()" style="display:none; background: var(--success-green); box-shadow: 0 6px 0 #20bf6b;">ACCEPT COFFEE ☕</button>
+        </div>
+
+        <!-- VIEW: FINAL ENDING -->
+        <div id="view-ending" class="view">
+            <div class="card" style="text-align: center; border: 5px solid var(--success-green); background: #f0fff4;">
+                <div style="font-size: 4rem; margin-bottom: 10px;">🚨</div>
+                <h2 style="color: var(--success-green); font-size: 2rem; margin-bottom: 15px;">CASE CLOSED</h2>
+                <p style="font-weight: bold; margin-bottom: 15px;">The suspect has agreed to temporarily stop:</p>
+                <ul style="list-style: none; font-weight: 900; line-height: 1.6; margin-bottom: 20px; color: var(--text-muted);">
+                    <li>TikTok</li>
+                    <li>Love Island</li>
+                    <li>Resume Updates</li>
+                    <li>Internship Acquisitions</li>
+                    <li>Business Acquisitions</li>
+                    <li>AI Acquisitions</li>
+                    <li>Security System Acquisitions</li>
+                </ul>
+                <div style="font-size: 1.5rem; font-weight: 900; color: var(--pink-primary); margin-bottom: 20px;">
+                    For One Coffee ☕
+                </div>
+                <div style="background: #fff; padding: 10px; border-radius: 10px; border: 2px dashed var(--alert-red);">
+                    <span style="font-weight: bold; color: var(--text-main);">Threat Level:</span><br>
+                    <span style="color: var(--alert-red); font-weight: 900; font-size: 1.2rem;">Still Extremely Dangerous ❤️</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Utilities
+        const playSound = () => { /* Fake sound fx placeholder */ };
+
+        // Floating Emojis
+        const emojis = ['❤️', '📱', '☕', '🎾', '🌴', '🍔', '🚶', '✨'];
+        setInterval(() => {
+            const el = document.createElement('div');
+            el.className = 'floating-emoji';
+            el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = Math.random() * 90 + 'vw';
+            el.style.fontSize = (Math.random() * 1 + 1) + 'rem';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }, 800);
+
+        // View Management
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // Live Notifications
+        const notifMessages = [
+            "Busy", "Still Busy", "TikTok detected", "Love Island detected", 
+            "Resume updated", "Availability not found", "Idea acquisition successful", 
+            "Another idea acquired", "Busy being busy", "Busy explaining why busy"
+        ];
+        
+        function formatTime(date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+        const notifContainer = document.getElementById('notif-container');
+        setInterval(() => {
+            const time = formatTime(new Date());
+            const msg = notifMessages[Math.floor(Math.random() * notifMessages.length)];
+            const div = document.createElement('div');
+            div.className = 'notif-item';
+            div.innerHTML = `<strong>${time}</strong> - ${msg}`;
+            notifContainer.prepend(div);
+            if(notifContainer.children.length > 5) {
+                notifContainer.removeChild(notifContainer.lastChild);
+            }
+        }, 2500);
+
+        // Breaking News Marquee
+        const newsItems = [
+            "BREAKING: Jahan opened TikTok again",
+            "BREAKING: free time was located",
+            "UPDATE: it was actually TikTok",
+            "BREAKING: resume updated again",
+            "BREAKING: investigation delayed due to Love Island"
+        ];
+        setInterval(() => {
+            const text = newsItems.sort(() => 0.5 - Math.random()).join(" • ") + " • ";
+            document.getElementById('breaking-marquee').innerText = text;
+        }, 15000);
+
+        // Random Toast Popups
+        const toast = document.getElementById('toast');
+        setInterval(() => {
+            if(Math.random() > 0.6) {
+                const msgs = ["System Warning: TikTok Opened", "Alert: Idea stolen", "Notice: Schedule is full", "FBI Alert: Suspect updating resume"];
+                toast.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        }, 8000);
+
+        // Free Time Detector Logic
+        const searchSteps = [
+            "checking TikTok...", "checking Love Island...", "checking resume...",
+            "checking internship folder...", "checking business ideas...",
+            "checking AI project...", "checking free time..."
+        ];
+        
+        const failureResults = [
+            { val: "7 seconds", sub: "Then she got tired." },
+            { val: "4 seconds", sub: "Then Love Island started." },
+            { val: "1 second", sub: "False alarm." },
+            { val: "ERROR", sub: "System crashed due to extreme busyness." },
+            { val: "NONE FOUND", sub: "We searched everywhere." },
+            { val: "FALSE ALARM", sub: "Opened TikTok again." }
+        ];
+
+        let searchAttempt = 0;
+
+        function startSearch() {
+            showView('view-search');
+            let step = 0;
+            const statusEl = document.getElementById('loading-status');
+            
+            const interval = setInterval(() => {
+                if(step < searchSteps.length) {
+                    statusEl.innerText = searchSteps[step];
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    statusEl.innerText = "free time not found";
+                    setTimeout(showResult, 800);
+                }
+            }, 600);
+        }
+
+        function showResult() {
+            showView('view-result');
+            
+            if (searchAttempt < failureResults.length) {
+                const res = failureResults[searchAttempt];
+                document.getElementById('result-label').innerText = "Available Time:";
+                document.getElementById('result-value').innerText = res.val;
+                document.getElementById('result-value').style.color = "var(--alert-red)";
+                document.getElementById('result-sub').innerText = res.sub;
+                
+                document.getElementById('btn-retry').style.display = "block";
+                document.getElementById('btn-accept').style.display = "none";
+                document.getElementById('coffee-extras').style.display = "none";
+                
+                searchAttempt++;
+            } else {
+                // The final successful outcome
+                document.getElementById('result-label').innerText = "UNBELIEVABLE! WE FOUND IT:";
+                document.getElementById('result-value').innerText = "COFFEE ☕";
+                document.getElementById('result-value').style.color = "var(--success-green)";
+                document.getElementById('result-sub').innerText = "Do not lose this opportunity!";
+                
+                document.getElementById('btn-retry').style.display = "none";
+                document.getElementById('btn-accept').style.display = "block";
+                document.getElementById('coffee-extras').style.display = "block";
+            }
+        }
+
+        function retrySearch() {
+            startSearch();
+        }
+
+        function showEnding() {
+            showView('view-ending');
+            // Confetti effect with hearts
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'floating-emoji';
+                    el.innerText = '🎉';
+                    el.style.left = Math.random() * 90 + 'vw';
+                    el.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 4000);
+                }, i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
