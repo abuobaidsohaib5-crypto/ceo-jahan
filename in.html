@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAHAN BUSY SCHEDULE™</title>
+    <style>
+        :root {
+            --brand-pink: #ff6b8b;
+            --brand-light-pink: #fff0f3;
+            --brand-dark: #2d2426;
+            --brand-gray: #75686a;
+            --brand-accent: #ffd166;
+            --bg-gradient: linear-gradient(135deg, #ffeef2 0%, #e6f0fa 100%);
+            --card-shadow: 0 15px 35px rgba(255, 107, 139, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka One', 'Chalkboard SE', 'Comic Sans MS', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--brand-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .app-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 36px;
+            box-shadow: var(--card-shadow);
+            padding: 28px;
+            border: 6px solid #ffffff;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .giant-logo {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--brand-pink);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px var(--brand-accent);
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--brand-gray);
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .app-section {
+            background: var(--brand-light-pink);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 20px;
+            border: 2px solid #ffe3e8;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            color: var(--brand-pink);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            row-gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            color: var(--brand-gray);
+            font-weight: bold;
+            padding-right: 10px;
+        }
+
+        .info-value {
+            font-weight: 900;
+            color: var(--brand-dark);
+            text-align: right;
+        }
+
+        .info-value.highlight {
+            color: var(--brand-pink);
+        }
+
+        .bullet-list {
+            list-style: none;
+        }
+
+        .bullet-list li {
+            font-size: 0.9rem;
+            padding: 6px 0 6px 24px;
+            position: relative;
+            line-height: 1.3;
+        }
+
+        .bullet-list li::before {
+            content: "•";
+            color: var(--brand-pink);
+            font-size: 1.5rem;
+            position: absolute;
+            left: 6px;
+            top: -2px;
+        }
+
+        .bullet-list.checks li::before { content: "✔"; color: #2e7d32; font-size: 1rem; top: 2px; }
+        .bullet-list.crosses li::before { content: "❌"; font-size: 0.9rem; top: 4px; }
+
+        .achievement-item {
+            font-size: 0.9rem;
+            padding: 8px;
+            background: #ffffff;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .disclaimer-box {
+            font-size: 0.75rem;
+            color: #8c7a7d;
+            background: #f7f1f2;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            border-left: 4px solid var(--brand-gray);
+        }
+
+        .disclaimer-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            color: var(--brand-dark);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background: var(--brand-pink);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-radius: 22px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #d94b6a;
+            transition: all 0.1s ease;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 #d94b6a;
+        }
+
+        .btn-secondary {
+            background: #eae2e4;
+            color: var(--brand-dark);
+            box-shadow: 0 5px 0 #bda2a6;
+            margin-top: 12px;
+        }
+        .btn-secondary:active {
+            box-shadow: 0 0px 0 #bda2a6;
+        }
+
+        .app-view {
+            display: none;
+        }
+
+        .app-view.active {
+            display: block;
+        }
+
+        .loader-wrap {
+            text-align: center;
+            padding: 50px 10px;
+        }
+
+        .pulse-logo {
+            font-size: 3.5rem;
+            animation: pulse 0.6s infinite alternate;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
+        .status-header {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--brand-pink);
+            margin-bottom: 10px;
+        }
+
+        .status-sub {
+            font-size: 0.95rem;
+            color: var(--brand-gray);
+            min-height: 24px;
+            font-style: italic;
+        }
+
+        .breaking-news-box {
+            background: #fffdf0;
+            border: 3px dashed #ffd166;
+            border-radius: 24px;
+            padding: 22px;
+            text-align: center;
+            margin: 20px 0;
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .news-flash {
+            background: #ff4757;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 10px;
+            animation: flash 0.5s infinite alternate;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .news-main-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--brand-pink);
+            margin: 8px 0;
+        }
+
+        .floating-deco {
+            position: absolute;
+            color: rgba(255, 107, 139, 0.35);
+            font-size: 1.4rem;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatAway 3.5s linear forwards;
+        }
+
+        @keyframes floatAway {
+            0% { transform: translateY(105vh) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(50px) rotate(360deg); opacity: 0; }
+        }
+
+        .scrolling-notifications {
+            max-height: 180px;
+            overflow-y: auto;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #ffe3e8;
+        }
+
+        .notif-item {
+            font-size: 0.85rem;
+            border-bottom: 1px dashed #eee;
+            padding: 6px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- APP HEADER -->
+        <header>
+            <div class="giant-logo">JAHAN BUSY SCHEDULE™</div>
+            <div class="subtitle">"Too busy for everyone. Somehow."</div>
+        </header>
+
+        <!-- VIEW 1: MAIN HOME DASHBOARD -->
+        <div id="view-dashboard" class="app-view active">
+            
+            <!-- Target Tracking -->
+            <div class="app-section">
+                <div class="section-title">Target Tracking</div>
+                <div class="info-grid">
+                    <div class="info-label">Current Location:</div><div class="info-value highlight">📱 TikTok</div>
+                    <div class="info-label">Last Seen:</div><div class="info-value highlight">📱 TikTok</div>
+                    <div class="info-label">Likely Next Location:</div><div class="info-value highlight">📱 TikTok</div>
+                </div>
+            </div>
+
+            <!-- Company Info -->
+            <div class="app-section">
+                <div class="section-title">Company Information</div>
+                <div class="info-grid">
+                    <div class="info-label">CEO:</div><div class="info-value">Jahan</div>
+                    <div class="info-label">Founded:</div><div class="info-value">2025</div>
+                    <div class="info-label">Industry:</div><div class="info-value">TikTok & Resume Development</div>
+                    <div class="info-label">Employees:</div><div class="info-value">1</div>
+                    <div class="info-label">Hours Worked:</div><div class="info-value">0</div>
+                    <div class="info-label">Hours On TikTok:</div><div class="info-value highlight">unlimited</div>
+                    <div class="info-label">Love Island Consumption:</div><div class="info-value highlight">concerning</div>
+                    <div class="info-label">Ideas Borrowed From Sohaib:</div><div class="info-value">still counting</div>
+                    <div class="info-label">Ideas Successfully Returned:</div><div class="info-value">0</div>
+                    <div class="info-label">Ideas Accidentally Borrowed:</div><div class="info-value">247</div>
+                    <div class="info-label">Ideas She Swears Were Hers:</div><div class="info-value">all of them</div>
+                    <div class="info-label">Resume Updates:</div><div class="info-value">93</div>
+                </div>
+            </div>
+
+            <!-- Why Is Jahan So Busy? -->
+            <div class="app-section">
+                <div class="section-title">Why Is Jahan So Busy?</div>
+                <ul class="bullet-list">
+                    <li>TikTok</li>
+                    <li>Love Island</li>
+                    <li>TikTok after Love Island</li>
+                    <li>Recovering from Love Island</li>
+                    <li>Updating resume</li>
+                    <li>Looking at other people's ideas</li>
+                    <li>Adding other people's ideas to resume</li>
+                    <li>Saying "that's actually a good idea"</li>
+                    <li>Accidentally stealing another internship</li>
+                </ul>
+            </div>
+
+            <!-- Official Explanation -->
+            <div class="app-section">
+                <div class="section-title">Official Explanation For Being Busy</div>
+                <div class="info-grid">
+                    <div class="info-label">1.</div><div class="info-value">TikTok</div>
+                    <div class="info-label">2.</div><div class="info-value">Love Island</div>
+                    <div class="info-label">3.</div><div class="info-value">Resume</div>
+                    <div class="info-label">4.</div><div class="info-value">TikTok</div>
+                    <div class="info-label">5.</div><div class="info-value">More TikTok</div>
+                    <div class="info-label">6.</div><div class="info-value">Unknown</div>
+                    <div class="info-label">7.</div><div class="info-value">Classified</div>
+                    <div class="info-label">8.</div><div class="info-value">TikTok</div>
+                </div>
+            </div>
+
+            <!-- Things Jahan Has/Does Not Have Time For -->
+            <div class="app-section">
+                <div class="section-title">Things Jahan Has Time For</div>
+                <ul class="bullet-list checks">
+                    <li>TikTok</li>
+                    <li>Love Island</li>
+                    <li>Resume updates</li>
+                    <li>Looking at internships</li>
+                    <li>Looking at my internships</li>
+                    <li>Looking at my ideas</li>
+                    <li>Being busy</li>
+                </ul>
+                <div class="section-title" style="margin-top: 15px;">Things Jahan Does NOT Have Time For</div>
+                <ul class="bullet-list crosses">
+                    <li>literally 5 minutes</li>
+                    <li>coffee</li>
+                    <li>tennis</li>
+                    <li>existing</li>
+                </ul>
+            </div>
+
+            <!-- Availability Audit -->
+            <div class="app-section">
+                <div class="section-title">Availability Audit</div>
+                <div class="info-grid">
+                    <div class="info-label">Availability:</div><div class="info-value">currently unavailable</div>
+                    <div class="info-label">After checking:</div><div class="info-value">still unavailable</div>
+                    <div class="info-label">After checking again:</div><div class="info-value" style="color:red;">somehow even less available</div>
+                    <div class="info-label">After checking 4th time:</div><div class="info-value">how did that happen</div>
+                    <div class="info-label">After checking 5th time:</div><div class="info-value" style="font-weight:900;">negative availability</div>
+                </div>
+            </div>
+
+            <!-- Known Crimes & Punishment -->
+            <div class="app-section">
+                <div class="section-title">Known Crimes</div>
+                <ul class="bullet-list crosses">
+                    <li>stealing internship ideas</li>
+                    <li>stealing business ideas</li>
+                    <li>stealing AI ideas</li>
+                    <li>stealing security system ideas</li>
+                    <li>stealing resume ideas</li>
+                    <li>stealing random thoughts</li>
+                    <li>stealing conversations and putting them on her resume</li>
+                </ul>
+                <div style="margin-top:12px; padding:8px; background:#fff; border-radius:10px; text-align:center; font-weight:bold;">
+                    ⚖️ Mandatory Punishment: <span style="color:var(--brand-pink);">coffee ☕</span>
+                </div>
+            </div>
+
+            <!-- Resume Timeline -->
+            <div class="app-section">
+                <div class="section-title">Resume Timeline</div>
+                <div class="info-grid">
+                    <div class="info-label">2025 (Early):</div><div class="info-value">normal resume</div>
+                    <div class="info-label">2025 (Mid):</div><div class="info-value">good resume</div>
+                    <div class="info-label">2025 (Late):</div><div class="info-value" style="color:orange;">suspiciously good resume</div>
+                    <div class="info-label">2025 (Winter):</div><div class="info-value">wait a minute</div>
+                    <div class="info-label">2026 (Now):</div><div class="info-value highlight">where did all these ideas come from</div>
+                </div>
+            </div>
+
+            <!-- Resume Achievements -->
+            <div class="app-section">
+                <div class="section-title">Resume Achievements</div>
+                <div class="achievement-item">🏆 Excellent Resume</div>
+                <div class="achievement-item">🏆 Impressive Experience</div>
+                <div class="achievement-item">🏆 Suspiciously Similar To My Resume</div>
+                <div class="achievement-item">🏆 Knows A Guy Who Had Those Ideas First</div>
+                <div class="achievement-item">🏆 Outstanding Borrowing Skills</div>
+            </div>
+
+            <!-- Recent Acquisitions -->
+            <div class="app-section">
+                <div class="section-title">Recent Acquisitions</div>
+                <div class="info-grid">
+                    <div class="info-label">2025:</div><div class="info-value">Acquired my internship idea</div>
+                    <div class="info-label">2025:</div><div class="info-value">Acquired my business idea</div>
+                    <div class="info-label">2025:</div><div class="info-value">Acquired my AI idea</div>
+                    <div class="info-label">2025:</div><div class="info-value">Acquired my secure system idea</div>
+                    <div class="info-label">2025:</div><div class="info-value">Attempted acquisition of literally everything else</div>
+                </div>
+            </div>
+
+            <!-- Report Card -->
+            <div class="app-section">
+                <div class="section-title">Report Card</div>
+                <div class="info-grid">
+                    <div class="info-label">Resume Quality:</div><div class="info-value">A+</div>
+                    <div class="info-label">Originality:</div><div class="info-value" style="color: #d32f2f;">under review</div>
+                    <div class="info-label">Idea Collection Skills:</div><div class="info-value">A+++</div>
+                    <div class="info-label">TikTok Dedication:</div><div class="info-value">Hall Of Fame</div>
+                    <div class="info-label">Love Island Commitment:</div><div class="info-value">Generational Talent</div>
+                    <div class="info-label">Availability:</div><div class="info-value">0%</div>
+                </div>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="app-section">
+                <div class="section-title">Recent Notifications</div>
+                <div class="scrolling-notifications">
+                    <div class="notif-item"><span>8:00 AM</span><strong>Busy</strong></div>
+                    <div class="notif-item"><span>8:01 AM</span><strong>Busy</strong></div>
+                    <div class="notif-item"><span>8:02 AM</span><strong>Busy</strong></div>
+                    <div class="notif-item"><span>8:03 AM</span><strong>Still busy</strong></div>
+                    <div class="notif-item"><span>8:04 AM</span><strong style="color:var(--brand-pink);">Busy but on TikTok</strong></div>
+                    <div class="notif-item"><span>8:05 AM</span><strong>Busy while watching Love Island</strong></div>
+                    <div class="notif-item"><span>8:06 AM</span><strong>Busy updating resume</strong></div>
+                    <div class="notif-item"><span>8:07 AM</span><strong>Busy explaining why she's busy</strong></div>
+                    <div class="notif-item"><span>8:08 AM</span><strong>Busy being busy</strong></div>
+                </div>
+            </div>
+
+            <!-- Science Corner -->
+            <div class="app-section" style="font-size:0.85rem; text-align:center; font-style:italic;">
+                <strong>Relationship Between Free Time And Jahan:</strong><br>
+                Researchers have concluded there is currently no evidence the two have ever met.
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer-box">
+                <div class="disclaimer-title">Disclaimer:</div>
+                Any similarities between this resume and my resume, internships, projects, business plans, AI ideas, security systems, future plans, or random shower thoughts are purely coincidental and currently under investigation.
+            </div>
+
+            <button class="btn" id="btn-start-search">Find Free Time</button>
+        </div>
+
+        <!-- VIEW 2: LOADING APP SEQUENCE -->
+        <div id="view-loading" class="app-view">
+            <div class="loader-wrap">
+                <div class="pulse-logo" id="loader-icon">📁</div>
+                <div class="status-header" id="load-header">checking resume...</div>
+                <div class="status-sub" id="load-sub">unbelievable</div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: SEARCH RESULTS & BREAKING NEWS COFFEE DELAY -->
+        <div id="view-findings" class="app-view">
+            <div class="breaking-news-box">
+                <div class="news-flash" id="flash-badge">BREAKING NEWS</div>
+                <div id="news-update-label" style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: var(--brand-gray);">Investigation Update:</div>
+                <div class="news-main-val" id="findings-display">Searching...</div>
+                
+                <p id="findings-subtitle" style="font-size: 0.9rem; font-weight: bold; line-height: 1.4; margin-top: 10px;">
+                    After a lengthy investigation it has been determined that Jahan may have approximately enough free time for:
+                </p>
+
+                <div id="extra-options-box" style="display:none; text-align: left; margin-top: 12px; background: white; padding: 12px; border-radius: 12px; font-size: 0.85rem;">
+                    • Maybe Tennis 🎾<br>
+                    • Maybe Food 🍔<br>
+                    • Maybe A Walk 🚶<br>
+                    <span style="font-style: italic; font-size: 0.75rem; color: var(--brand-gray); display: block; margin-top: 5px;">*depending on TikTok conditions.</span>
+                </div>
+            </div>
+
+            <button class="btn" id="btn-action-primary">Book Slot</button>
+            <button class="btn btn-secondary" id="btn-action-secondary">Keep Searching</button>
+        </div>
+
+        <!-- VIEW 4: FINAL SUCCESS SCREEN -->
+        <div id="view-final" class="app-view">
+            <div class="app-section" style="text-align: center; background: #e8f5e9; border-color: #c8e6c9;">
+                <div style="font-size: 3.5rem; margin-bottom: 10px;">🤝</div>
+                <div class="section-title" style="color: #2e7d32; display: block; text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 5px;">
+                    CASE CLOSED ✅
+                </div>
+                <p style="font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px; font-weight: bold;">
+                    The suspect has agreed to temporarily stop:
+                </p>
+                
+                <div style="text-align: left; background: rgba(255,255,255,0.7); padding: 12px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 15px;">
+                    • TikTok<br>
+                    • Love Island<br>
+                    • Resume updates<br>
+                    • Internship acquisitions<br>
+                    • Business acquisitions<br>
+                    • AI acquisitions<br>
+                    • Security system acquisitions
+                </div>
+
+                <p style="font-weight: 900; color: #2e7d32; font-size: 1.1rem; text-transform: uppercase;">
+                    for one coffee. ☕
+                </p>
+            </div>
+
+            <div class="app-section" style="background: #ffebee; border-color: #ffcdd2; text-align: center;">
+                <div style="font-size: 0.8rem; font-weight: bold; color: #c62828;">Threat Level:</div>
+                <div style="font-size: 1.1rem; font-weight: 900; color: #c62828;">Still Extremely Dangerous. ❤️</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let cycleIndex = 0;
+        let frustrationLevel = 0;
+
+        const cycleSteps = [
+            { header: "checking resume...", sub: "calendar currently fighting for its life", icon: "📁" },
+            { header: "checking my resume...", sub: "this is getting difficult", icon: "🕵️‍♂️" },
+            { header: "checking her resume...", sub: "unbelievable", icon: "📄" },
+            { header: "wait a minute...", sub: "Love Island strikes again", icon: "🤨" },
+            { header: "those look familiar...", sub: "TikTok has claimed another victim", icon: "👁️" },
+            { header: "Emergency Availability Scan", sub: "Scanning...", icon: "📡" },
+            { header: "Scanning...", sub: "almost found a free slot", icon: "📡" },
+            { header: "Scanning...", sub: "never mind", icon: "📡" },
+            { header: "No availability found.", sub: "so close", icon: "❌" },
+            { header: "Checking TikTok...", sub: "Found.", icon: "📱" },
+            { header: "Checking Love Island...", sub: "Found.", icon: "🌴" },
+            { header: "Checking resume...", sub: "Found.", icon: "📝" },
+            { header: "Checking free time...", sub: "Not found.", icon: "🔍" },
+            { header: "investigation continuing...", sub: "not even close", icon: "🏃" },
+            { header: "checking internship folder...", sub: "missing", icon: "📂" },
+            { header: "checking AI project...", sub: "missing", icon: "🤖" },
+            { header: "checking business ideas...", sub: "also missing", icon: "💡" },
+            { header: "asking Jahan...", sub: "waiting for response...", icon: "💬" },
+            { header: "response: \"nuh uh\"", sub: "the system is getting deeply frustrated...", icon: "🙄" }
+        ];
+
+        // Increasingly ridiculous, broken outcomes as the user keeps pressing search
+        const ridiculousOutcomes = [
+            { type: "news", main: "false alarm.", time: "Free time discovered.", sub: "System hopes faded immediately." },
+            { type: "news", main: "it was TikTok.", time: "Free time discovered.", sub: "False recognition event logged." },
+            { type: "news", main: "resume update detected.", time: "Free time discovered.", sub: "Jahan opened Microsoft Word." },
+            { type: "time", main: "7 seconds", time: "Available Time:", sub: "Reason: rolled over in bed" },
+            { type: "time", main: "4 seconds", time: "Available Time:", sub: "Reason: needed to scroll another minute" },
+            { type: "time", main: "1 second", time: "Available Time:", sub: "Reason: opened app blindly" },
+            { type: "time", main: "none found", time: "Available Time:", sub: "Reason: catastrophic blockages" },
+            { type: "time", main: "error", time: "Available Time:", sub: "Reason: opened TikTok again" }
+        ];
+
+        function transitionTo(viewId) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function generateDecoItem() {
+            const el = document.createElement('div');
+            el.classList.add('floating-deco');
+            el.innerText = ['❤️', '✨', '🌴', '📱', '☕', '📄', '❌', '🍔'][Math.floor(Math.random() * 8)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            el.style.fontSize = (Math.random() * 0.8 + 1.1) + 'rem';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+        
+        // Website gets progressively rowdier/sillier over time
+        setInterval(() => {
+            generateDecoItem();
+            if (frustrationLevel > 2) {
+                // Spawn extra floating chaos items if frustrated
+                setTimeout(generateDecoItem, 200);
+            }
+        }, 600);
+
+        function loadThenExecute(completionCallback) {
+            transitionTo('view-loading');
+            let idx = 0;
+            // Website speeds up execution step rendering as it grows frustrated
+            let speed = Math.max(150, 400 - (frustrationLevel * 80)); 
+            
+            function stepRunner() {
+                if (idx < cycleSteps.length) {
+                    document.getElementById('load-header').innerText = cycleSteps[idx].header;
+                    document.getElementById('load-sub').innerText = cycleSteps[idx].sub;
+                    document.getElementById('loader-icon').innerText = cycleSteps[idx].icon;
+                    idx++;
+                    setTimeout(stepRunner, speed);
+                } else {
+                    completionCallback();
+                }
+            }
+            stepRunner();
+        }
+
+        document.getElementById('btn-start-search').addEventListener('click', () => {
+            loadThenExecute(() => {
+                document.getElementById('flash-badge').innerText = "BREAKING NEWS";
+                document.getElementById('news-update-label').innerText = "Investigation Update:";
+                document.getElementById('findings-display').innerText = "2:37 PM\n(14 seconds)";
+                document.getElementById('findings-subtitle').style.display = "block";
+                document.getElementById('extra-options-box').style.display = "none";
+                document.getElementById('btn-action-primary').innerText = "book slot";
+                document.getElementById('btn-action-secondary').style.display = "block";
+                transitionTo('view-findings');
+            });
+        });
+
+        document.getElementById('btn-action-secondary').addEventListener('click', () => {
+            frustrationLevel++;
+            loadThenExecute(() => {
+                if (cycleIndex < ridiculousOutcomes.length) {
+                    const outcome = ridiculousOutcomes[cycleIndex];
+                    
+                    if (outcome.type === "news") {
+                        document.getElementById('flash-badge').innerText = "BREAKING NEWS";
+                        document.getElementById('news-update-label').innerText = "Investigation Update:";
+                        document.getElementById('findings-display').innerText = outcome.main;
+                        document.getElementById('findings-subtitle').innerText = outcome.time;
+                    } else {
+                        document.getElementById('flash-badge').innerText = "SYSTEM ERROR";
+                        document.getElementById('news-update-label').innerText = outcome.time;
+                        document.getElementById('findings-display').innerText = outcome.main;
+                        document.getElementById('findings-subtitle').innerText = outcome.sub;
+                    }
+                    
+                    cycleIndex++;
+                } else {
+                    // Final Trigger Payload -> Coffee Escape Loophole
+                    document.getElementById('flash-badge').innerText = "BREAKING NEWS";
+                    document.getElementById('news-update-label').innerText = "Final Determination:";
+                    document.getElementById('findings-display').innerText = "Coffee ☕";
+                    document.getElementById('findings-subtitle').innerHTML = "After a lengthy investigation it has been determined that Jahan may have approximately enough free time for Coffee.";
+                    document.getElementById('extra-options-box').style.display = "block";
+                    document.getElementById('btn-action-primary').innerText = "accept";
+                    document.getElementById('btn-action-secondary').style.display = "none";
+                }
+                transitionTo('view-findings');
+            });
+        });
+
+        document.getElementById('btn-action-primary').addEventListener('click', function() {
+            if (this.innerText === "accept" || cycleIndex === 0) {
+                transitionTo('view-final');
+                for(let i=0; i<50; i++) setTimeout(generateDecoItem, i * 60);
+            } else {
+                alert("Error: Jahan just updated her resume with your search query. Booking slot vanished into the void.");
+                document.getElementById('btn-action-secondary').click();
+            }
+        });
+    </script>
+</body>
+</html>
